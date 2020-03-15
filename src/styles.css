@@ -1,5 +1,12 @@
-.marginTopOne {
+.marginTopTwenty {
   margin-top: 20px;
+}
+.marginRightTen {
+  margin-right: 10px !important;
+}
+
+.marginBottomTen {
+  margin-bottom: 10px !important;
 }
 
 .default {
@@ -8,7 +15,33 @@
   display: inline-block;
 }
 .redColor {
-    color: #e45;
-    padding-left: 5px;
-    display: inline-block;
+  color: #f50a21;
+  padding-left: 5px;
+  display: inline-block;
+}
+
+.paddingZero {
+  padding-bottom: 16px !important;
+}
+
+.selectedAnswer {
+  border-color: #37af40 !important;
+  background: #d4f7d2 !important;
+}
+
+.boldText {
+  font-weight: bold;
+}
+
+.scoreContainer {
+  padding: 40px 0;
+}
+
+@media (max-width: 400px) {
+  .alignCenter {
+    text-align: center;
+  }
+  .buttonWidth {
+    width: 100%;
+  }
 }

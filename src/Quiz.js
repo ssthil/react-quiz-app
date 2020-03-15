@@ -1,41 +1,34 @@
-import React, { Component } from 'react';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import './styles.css';
 // import { makeStyles } from '@material-ui/core/styles';
 import {
-  CssBaseline,
-  Container,
+  Button,
   Card,
   CardContent,
-  CardActions,
+  Container,
+  CssBaseline,
   Typography,
-  Button,
-  Chip,
 } from '@material-ui/core';
-import DoneIcon from '@material-ui/icons/Done';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import React, { Component } from 'react';
+import './styles.css';
 
 export default class Quiz extends Component {
   state = {
-    datad: [],
+    data: [],
     question: [],
     randomQuestions: [],
     selectedQuestion: 0,
-    answer: null,
+    myAnswer: null,
     options: [],
     seconds: 20,
+    score: 0,
+    isScoreCardView: false,
+    buttonDisabled: true,
   };
 
   componentDidMount() {
     this.getData();
 
-    this.myInterval = setInterval(() => {
-      const { seconds } = this.state;
-      if (seconds > 0) {
-        this.setState({
-          seconds: seconds - 1,
-        });
-      }
-    }, 1000);
+    this.setTimer();
   }
   componentDidUpdate(prevProps, prevState) {
     if (prevState.randomQuestions !== this.state.randomQuestions) {
@@ -61,35 +54,73 @@ export default class Quiz extends Component {
         this.setState(() => {
           return {
             randomQuestions,
+            data: results,
           };
         });
       });
   };
 
   loadQuizData = () => {
-    const { randomQuestions } = this.state;
+    const { data, randomQuestions } = this.state;
     const randomOptions = [];
-    for(let i=0; i < 3; i++) {
-        const randomItems = randomQuestions[Math.floor(Math.random() * randomQuestions.length)];
-        randomOptions.push(randomItems.title)
+    for (let i = 0; i < 3; i++) {
+      const randomItems = data[Math.floor(Math.random() * data.length)];
+      randomOptions.push(randomItems.title);
     }
-    console.log(randomOptions)
+
+    const suffleOptions = [
+      randomQuestions[this.state.selectedQuestion].title,
+      ...randomOptions,
+    ].sort(() => Math.random() - 0.5);
+
     this.setState(() => {
       return {
         question: randomQuestions[this.state.selectedQuestion].excerpt,
-        options: [randomQuestions[this.state.selectedQuestion].title, ...randomOptions],
+        options: suffleOptions,
+        answer: randomQuestions[this.state.selectedQuestion].title,
+        buttonDisabled: true,
       };
     });
   };
 
-  checkNextQuestion = () => {
+  goToNextQuestion = () => {
+    const { myAnswer, answer, score, selectedQuestion } = this.state;
+    if (myAnswer === answer) {
+      this.setState({
+        score: score + 1,
+      });
+    }
     this.setState({
-      selectedQuestion: this.state.selectedQuestion + 1,
+      selectedQuestion: selectedQuestion + 1,
       seconds: 20,
     });
   };
 
-  handleClick = () => console.log(this.state.options[0]);
+  checkAnswer(answer) {
+    this.setState({
+      myAnswer: answer,
+      buttonDisabled: false,
+    });
+  }
+
+  getScore = () => {
+    this.setState({
+      score: this.state.score + 1,
+      isScoreCardView: true,
+    });
+  };
+
+  setTimer() {
+    setInterval(() => {
+      const { seconds } = this.state;
+      if (seconds > 0) {
+        this.setState({
+          seconds: seconds - 1,
+        });
+      }
+    }, 1000);
+  }
+  restartQuiz = () => window.location.reload();
 
   render() {
     const {
@@ -98,64 +129,105 @@ export default class Quiz extends Component {
       selectedQuestion,
       options,
       seconds,
+      myAnswer,
+      score,
+      isScoreCardView,
+      buttonDisabled,
     } = this.state;
-    console.log(options);
+
     return (
       <React.Fragment>
         <CssBaseline />
         <Container fixed>
-          <h1>Quiz</h1>
-          <Typography variant="subtitle1">
-            Question {selectedQuestion + 1} of {randomQuestions.length}
-          </Typography>
-          {randomQuestions.length > 0 ? (
-            <div className="marginTopOne">
+          <h1 className="alignCenter">Quiz App</h1>
+          {!isScoreCardView && (
+            <Typography variant="subtitle1" className="alignCenter">
+              Question {selectedQuestion + 1} of {randomQuestions.length}
+            </Typography>
+          )}
+
+          {randomQuestions.length === 0 ? (
+            <CircularProgress />
+          ) : !isScoreCardView ? (
+            <div className="marginTopTwenty">
               <Card>
-                <CardContent>
+                <CardContent className="paddingZero">
                   <Typography>{question}</Typography>
+
+                  <div className="marginTopTwenty">
+                    {options.map((item, index) => (
+                      <Button
+                        variant="outlined"
+                        size="medium"
+                        color="default"
+                        key={index}
+                        onClick={() => this.checkAnswer(item)}
+                        className={`marginBottomTen marginRightTen buttonWidth ${
+                          myAnswer === item ? 'selectedAnswer' : null
+                        }`}
+                      >
+                        {item}
+                      </Button>
+                    ))}
+                  </div>
                 </CardContent>
-                <CardActions>
-                  {options.map((item, index) => (
-                    <Chip
-                      key={index}
-                      label={item}
-                      onClick={this.handleClick}
-                      deleteIcon={<DoneIcon />}
-                    />
-                  ))}
-                </CardActions>
               </Card>
             </div>
           ) : (
-            <CircularProgress />
+            <div className="scoreContainer alignCenter">
+              <Typography variant="subtitle1">Your score is</Typography>
+              <Typography variant="h3">
+                {score}/{randomQuestions.length}
+              </Typography>
+            </div>
           )}
-          <div className="marginTopOne">
+          <div className={`marginTopTwenty`}>
             {selectedQuestion < randomQuestions.length - 1 && (
               <Button
+                className="buttonWidth"
                 variant="contained"
                 color="primary"
-                onClick={this.checkNextQuestion}
+                onClick={this.goToNextQuestion}
+                disabled={buttonDisabled}
               >
                 Next
               </Button>
             )}
-            {selectedQuestion === randomQuestions.length - 1 && (
-              <Button variant="contained" color="secondary">
-                Done
+            {selectedQuestion === randomQuestions.length - 1 &&
+              !isScoreCardView && (
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={this.getScore}
+                  disabled={buttonDisabled}
+                  className="buttonWidth"
+                >
+                  Finish
+                </Button>
+              )}
+            {isScoreCardView && (
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={this.restartQuiz}
+                className="buttonWidth"
+              >
+                Reset
               </Button>
             )}
           </div>
-
-          <div className="marginTopOne">
-            <Typography variant="h6">
-              Time Remaining:
-              <span
-                className={this.state.seconds < 10 ? 'redColor' : 'default'}
-              >
-                00:{seconds >= 10 ? seconds : `0${seconds}`}
-              </span>
-            </Typography>
-          </div>
+          {!isScoreCardView && (
+            <div className="marginTopTwenty">
+              <Typography variant="subtitle1" className={`alignCenter ${this.state.seconds < 10 ? 'redColor' : 'default'}`}>
+                Time Remaining:
+                <span
+                  className="boldText"
+                >
+                  00:{seconds >= 10 ? seconds : `0${seconds}`}
+                </span>
+              </Typography>
+            </div>
+          )}
         </Container>
       </React.Fragment>
     );
