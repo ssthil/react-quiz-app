@@ -11,6 +11,10 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import React, { Component } from 'react';
 import './styles.css';
 
+/** components */
+import { Header } from './components/Header';
+import { ActionButton } from './components/Button';
+
 export default class Quiz extends Component {
   state = {
     data: [],
@@ -139,7 +143,7 @@ export default class Quiz extends Component {
       <React.Fragment>
         <CssBaseline />
         <Container fixed>
-          <h1 className="alignCenter">Quiz App</h1>
+          <Header className="alignCenter" title="Quiz App" />
           {!isScoreCardView && (
             <Typography variant="subtitle1" className="alignCenter">
               Question {selectedQuestion + 1} of {randomQuestions.length}
@@ -183,46 +187,41 @@ export default class Quiz extends Component {
           )}
           <div className={`marginTopTwenty`}>
             {selectedQuestion < randomQuestions.length - 1 && (
-              <Button
-                className="buttonWidth"
-                variant="contained"
+              <ActionButton
                 color="primary"
                 onClick={this.goToNextQuestion}
                 disabled={buttonDisabled}
-              >
-                Next
-              </Button>
+                text="Next"
+              />
             )}
             {selectedQuestion === randomQuestions.length - 1 &&
               !isScoreCardView && (
-                <Button
-                  variant="contained"
+                <ActionButton
                   color="secondary"
                   onClick={this.getScore}
                   disabled={buttonDisabled}
-                  className="buttonWidth"
-                >
-                  Finish
-                </Button>
+                  text="Finish"
+                />
               )}
             {isScoreCardView && (
-              <Button
-                variant="contained"
+              <ActionButton
                 color="secondary"
                 onClick={this.restartQuiz}
-                className="buttonWidth"
-              >
-                Reset
-              </Button>
+                disabled={false}
+                text="Restart"
+              />
             )}
           </div>
           {!isScoreCardView && (
             <div className="marginTopTwenty">
-              <Typography variant="subtitle1" className={`alignCenter ${this.state.seconds < 10 ? 'redColor' : 'default'}`}>
+              <Typography
+                variant="subtitle1"
+                className={`alignCenter ${
+                  this.state.seconds < 10 ? 'redColor' : 'default'
+                }`}
+              >
                 Time Remaining:
-                <span
-                  className="boldText"
-                >
+                <span className="boldText">
                   00:{seconds >= 10 ? seconds : `0${seconds}`}
                 </span>
               </Typography>
