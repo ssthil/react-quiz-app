@@ -1,19 +1,28 @@
-// import { makeStyles } from '@material-ui/core/styles';
+// @ts-ignore
+import React, { Component } from 'react';
 import {
-  Button,
   Card,
   CardContent,
   Container,
   CssBaseline,
   Typography,
+  Grid,
 } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import React, { Component } from 'react';
+/** components */
+import {
+  Header,
+  Answers,
+  ActionButton,
+  ScoreCard,
+  QuestionCount,
+  Timer,
+  AnswerCard,
+} from './components';
+/** style */
 import './styles.css';
 
-/** components */
-import { Header } from './components/Header';
-import { ActionButton } from './components/Button';
+const API_URL = 'https://api.binance.vision/api/glossaries';
 
 export default class Quiz extends Component {
   state = {
@@ -27,11 +36,12 @@ export default class Quiz extends Component {
     score: 0,
     isScoreCardView: false,
     buttonDisabled: true,
+    selectedAnswers: [],
+    answerOptionDisabled: false,
   };
 
   componentDidMount() {
     this.getData();
-
     this.setTimer();
   }
   componentDidUpdate(prevProps, prevState) {
@@ -43,8 +53,9 @@ export default class Quiz extends Component {
     }
   }
 
+  /** get data from api */
   getData = () => {
-    fetch('https://api.binance.vision/api/glossaries')
+    fetch(API_URL)
       .then(res => res.json())
       .then(data => {
         const results = data;
@@ -64,6 +75,7 @@ export default class Quiz extends Component {
       });
   };
 
+  /** load quiz data */
   loadQuizData = () => {
     const { data, randomQuestions } = this.state;
     const randomOptions = [];
@@ -87,6 +99,7 @@ export default class Quiz extends Component {
     });
   };
 
+  /** go to next question */
   goToNextQuestion = () => {
     const { myAnswer, answer, score, selectedQuestion } = this.state;
     if (myAnswer === answer) {
@@ -94,26 +107,39 @@ export default class Quiz extends Component {
         score: score + 1,
       });
     }
-    this.setState({
+    this.setState(prevState => ({
       selectedQuestion: selectedQuestion + 1,
       seconds: 20,
-    });
+      selectedAnswers: [...prevState.selectedAnswers, { myAnswer, answer }],
+      answerOptionDisabled: false,
+    }));
   };
 
+  /** check answer */
   checkAnswer(answer) {
     this.setState({
       myAnswer: answer,
       buttonDisabled: false,
+      answerOptionDisabled: true,
     });
   }
 
+  /** get score */
   getScore = () => {
-    this.setState({
-      score: this.state.score + 1,
+    const { myAnswer, answer, score } = this.state;
+    if (myAnswer === answer) {
+      this.setState({
+        score: score + 1,
+      });
+    }
+    this.setState(prevState => ({
+      selectedAnswers: [...prevState.selectedAnswers, { myAnswer, answer }],
       isScoreCardView: true,
-    });
+      seconds: 0,
+    }));
   };
 
+  /** timer */
   setTimer() {
     setInterval(() => {
       const { seconds } = this.state;
@@ -124,6 +150,7 @@ export default class Quiz extends Component {
       }
     }, 1000);
   }
+  /** restart quiz */
   restartQuiz = () => window.location.reload();
 
   render() {
@@ -137,6 +164,7 @@ export default class Quiz extends Component {
       score,
       isScoreCardView,
       buttonDisabled,
+      answerOptionDisabled,
     } = this.state;
 
     return (
@@ -145,9 +173,10 @@ export default class Quiz extends Component {
         <Container fixed>
           <Header className="alignCenter" title="Quiz App" />
           {!isScoreCardView && (
-            <Typography variant="subtitle1" className="alignCenter">
-              Question {selectedQuestion + 1} of {randomQuestions.length}
-            </Typography>
+            <QuestionCount
+              selectedQuestion={selectedQuestion}
+              randomQuestions={randomQuestions.length}
+            />
           )}
 
           {randomQuestions.length === 0 ? (
@@ -157,33 +186,49 @@ export default class Quiz extends Component {
               <Card>
                 <CardContent className="paddingZero">
                   <Typography>{question}</Typography>
-
                   <div className="marginTopTwenty">
                     {options.map((item, index) => (
-                      <Button
-                        variant="outlined"
-                        size="medium"
-                        color="default"
+                      <Answers
+                        item={item}
                         key={index}
                         onClick={() => this.checkAnswer(item)}
                         className={`marginBottomTen marginRightTen buttonWidth ${
                           myAnswer === item ? 'selectedAnswer' : null
                         }`}
-                      >
-                        {item}
-                      </Button>
+                        disabled={answerOptionDisabled}
+                      />
                     ))}
                   </div>
                 </CardContent>
               </Card>
             </div>
           ) : (
-            <div className="scoreContainer alignCenter">
-              <Typography variant="subtitle1">Your score is</Typography>
-              <Typography variant="h3">
-                {score}/{randomQuestions.length}
-              </Typography>
-            </div>
+            <Card>
+              <CardContent>
+                <Grid container spacing={3}>
+                  <Grid lg={6} sm={6} xs={12}>
+                    <ScoreCard
+                      score={score}
+                      randomQuestions={randomQuestions}
+                    />
+                  </Grid>
+                  <Grid lg={6} sm={6} xs={12}>
+                    {this.state.selectedAnswers.map((obj, index) => (
+                      <AnswerCard
+                        key={index}
+                        className={`alignCenter
+                      ${
+                        obj.myAnswer === obj.answer
+                          ? 'correctAnswer'
+                          : 'inCorrectAnswer'
+                      }`}
+                        myAnswer={obj.myAnswer}
+                      />
+                    ))}
+                  </Grid>
+                </Grid>
+              </CardContent>
+            </Card>
           )}
           <div className={`marginTopTwenty`}>
             {selectedQuestion < randomQuestions.length - 1 && (
@@ -205,28 +250,14 @@ export default class Quiz extends Component {
               )}
             {isScoreCardView && (
               <ActionButton
-                color="secondary"
+                color="primary"
                 onClick={this.restartQuiz}
                 disabled={false}
                 text="Restart"
               />
             )}
           </div>
-          {!isScoreCardView && (
-            <div className="marginTopTwenty">
-              <Typography
-                variant="subtitle1"
-                className={`alignCenter ${
-                  this.state.seconds < 10 ? 'redColor' : 'default'
-                }`}
-              >
-                Time Remaining:
-                <span className="boldText">
-                  00:{seconds >= 10 ? seconds : `0${seconds}`}
-                </span>
-              </Typography>
-            </div>
-          )}
+          {!isScoreCardView && <Timer seconds={seconds} />}
         </Container>
       </React.Fragment>
     );

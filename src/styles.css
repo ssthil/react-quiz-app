@@ -17,7 +17,6 @@
 .redColor {
   color: #f50a21;
   padding-left: 5px;
-  display: inline-block;
 }
 
 .paddingZero {
@@ -25,8 +24,9 @@
 }
 
 .selectedAnswer {
-  border-color: #37af40 !important;
-  background: #d4f7d2 !important;
+  border-color: #96c8f1 !important;
+  background: #edf6fb !important;
+  color: #466988 !important;
 }
 
 .boldText {
@@ -35,9 +35,19 @@
 
 .scoreContainer {
   padding: 40px 0;
+  margin-top: 50px;
+  text-align: center;
 }
 
-@media (max-width: 400px) {
+.correctAnswer {
+  color: #049c03;
+}
+
+.inCorrectAnswer {
+  color: #e0022a;
+}
+
+@media (max-width: 599px) {
   .alignCenter {
     text-align: center;
   }
