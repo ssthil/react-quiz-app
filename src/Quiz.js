@@ -196,7 +196,7 @@ export default class Quiz extends Component {
                         className={`marginBottomTen marginRightTen buttonWidth ${
                           myAnswer === item ? 'selectedAnswer' : null
                         }`}
-                        disabled={answerOptionDisabled}
+                        disabled={seconds === 0 ? true : answerOptionDisabled}
                       />
                     ))}
                   </div>
@@ -236,7 +236,7 @@ export default class Quiz extends Component {
               <ActionButton
                 color="primary"
                 onClick={this.goToNextQuestion}
-                disabled={buttonDisabled}
+                disabled={seconds === 0 ? false : buttonDisabled}
                 text="Next"
               />
             )}
