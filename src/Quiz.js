@@ -44,6 +44,7 @@ export default class Quiz extends Component {
     this.getData();
     this.setTimer();
   }
+  
   componentDidUpdate(prevProps, prevState) {
     if (prevState.randomQuestions !== this.state.randomQuestions) {
       this.loadQuizData();
