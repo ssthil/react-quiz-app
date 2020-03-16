@@ -212,7 +212,7 @@ export default class Quiz extends Component {
                       randomQuestions={randomQuestions}
                     />
                   </Grid>
-                  <Grid lg={6} sm={6} xs={12}>
+                  <Grid lg={6} sm={6} xs={12} className="paddingTopBottom">
                     {this.state.selectedAnswers.map((obj, index) => (
                       <AnswerCard
                         key={index}
