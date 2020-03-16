@@ -9,6 +9,10 @@
   margin-bottom: 10px !important;
 }
 
+.marginBottomTwenty {
+  margin-bottom: 20px !important;
+}
+
 .default {
   color: #000000;
   padding-left: 5px;
@@ -44,10 +48,14 @@
 }
 
 .correctAnswer {
+  color: #049c03 !important;
+  background: #e1fdeb !important;
+}
+.selectedCorrectAnswer {
   color: #049c03;
 }
 
-.inCorrectAnswer {
+.selectedInCorrectAnswer {
   color: #e0022a;
 }
 

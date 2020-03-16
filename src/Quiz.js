@@ -78,7 +78,7 @@ export default class Quiz extends Component {
 
   /** load quiz data */
   loadQuizData = () => {
-    const { data, randomQuestions } = this.state;
+    const { data, randomQuestions, selectedQuestion } = this.state;
     const randomOptions = [];
     for (let i = 0; i < 3; i++) {
       const randomItems = data[Math.floor(Math.random() * data.length)];
@@ -86,15 +86,15 @@ export default class Quiz extends Component {
     }
 
     const suffleOptions = [
-      randomQuestions[this.state.selectedQuestion].title,
+      randomQuestions[selectedQuestion].title,
       ...randomOptions,
     ].sort(() => Math.random() - 0.5);
 
     this.setState(() => {
       return {
-        question: randomQuestions[this.state.selectedQuestion].excerpt,
+        question: randomQuestions[selectedQuestion].excerpt,
         options: suffleOptions,
-        answer: randomQuestions[this.state.selectedQuestion].title,
+        answer: randomQuestions[selectedQuestion].title,
         buttonDisabled: true,
       };
     });
@@ -113,6 +113,7 @@ export default class Quiz extends Component {
       seconds: 20,
       selectedAnswers: [...prevState.selectedAnswers, { myAnswer, answer }],
       answerOptionDisabled: false,
+      myAnswer: null,
     }));
   };
 
@@ -154,6 +155,16 @@ export default class Quiz extends Component {
   /** restart quiz */
   restartQuiz = () => window.location.reload();
 
+  getSelectedAnswersLength(arr) {
+    var length=0;
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].myAnswer !== null) {
+        length++;
+      }
+    }
+    return length;
+  }
+
   render() {
     const {
       randomQuestions,
@@ -166,6 +177,8 @@ export default class Quiz extends Component {
       isScoreCardView,
       buttonDisabled,
       answerOptionDisabled,
+      answer,
+      selectedAnswers,
     } = this.state;
 
     return (
@@ -194,7 +207,9 @@ export default class Quiz extends Component {
                         key={index}
                         onClick={() => this.checkAnswer(item)}
                         className={`marginBottomTen marginRightTen buttonWidth ${
-                          myAnswer === item ? 'selectedAnswer' : null
+                          myAnswer === item ? 'selectedAnswer' : ''
+                        }${
+                          seconds === 0 && item === answer ? 'correctAnswer' : ''
                         }`}
                         disabled={seconds === 0 ? true : answerOptionDisabled}
                       />
@@ -214,14 +229,20 @@ export default class Quiz extends Component {
                     />
                   </Grid>
                   <Grid item lg={6} sm={6} xs={12} className="paddingTopBottom">
-                    {this.state.selectedAnswers.map((obj, index) => (
+                    <Typography variant="h6" className="marginBottomTwenty boldText alignCenter">
+                      {`You have answered ${this.getSelectedAnswersLength(
+                        selectedAnswers
+                      )} out of
+                      ${randomQuestions.length}`}
+                    </Typography>
+                    {selectedAnswers.map((obj, index) => (
                       <AnswerCard
                         key={index}
                         className={`alignCenter
                       ${
                         obj.myAnswer === obj.answer
-                          ? 'correctAnswer'
-                          : 'inCorrectAnswer'
+                          ? 'selectedCorrectAnswer'
+                          : 'selectedInCorrectAnswer'
                       }`}
                         myAnswer={obj.myAnswer}
                       />
@@ -245,7 +266,7 @@ export default class Quiz extends Component {
                 <ActionButton
                   color="secondary"
                   onClick={this.getScore}
-                  disabled={buttonDisabled}
+                  disabled={seconds === 0 ? false : buttonDisabled}
                   text="Finish"
                 />
               )}
