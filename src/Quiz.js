@@ -44,7 +44,7 @@ export default class Quiz extends Component {
     this.getData();
     this.setTimer();
   }
-  
+
   componentDidUpdate(prevProps, prevState) {
     if (prevState.randomQuestions !== this.state.randomQuestions) {
       this.loadQuizData();
@@ -207,13 +207,13 @@ export default class Quiz extends Component {
             <Card>
               <CardContent>
                 <Grid container spacing={3}>
-                  <Grid lg={6} sm={6} xs={12}>
+                  <Grid item lg={6} sm={6} xs={12}>
                     <ScoreCard
                       score={score}
                       randomQuestions={randomQuestions}
                     />
                   </Grid>
-                  <Grid lg={6} sm={6} xs={12} className="paddingTopBottom">
+                  <Grid item lg={6} sm={6} xs={12} className="paddingTopBottom">
                     {this.state.selectedAnswers.map((obj, index) => (
                       <AnswerCard
                         key={index}
